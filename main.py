@@ -4,8 +4,11 @@ import json
 from pydantic import BaseModel,Field,computed_field,field_validator
 from typing import Annotated,Literal,Optional 
 from fastapi.responses import JSONResponse
+from myenv.db import Base,engine
 
-app = FastAPI()
+Base.metadata.create_all(engine)
+
+app=FastAPI(title="Patient Management Application")
 
 class Patient(BaseModel):
     name: str
@@ -202,6 +205,5 @@ def delete_patient(patient_id: str):
     raise HTTPException(status_code=404, detail='patient not found')
         
         
-
     
 
