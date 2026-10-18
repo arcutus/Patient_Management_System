@@ -8,11 +8,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from myenv.db import Base, engine, get_db
 from sqlmodel import TaskModel
+from router import router as task_router
 
 
 Base.metadata.create_all(engine)
 
 app=FastAPI(title="Patient Management Application")
+app.include_router(task_router)
 
 @app.get("/db-check")
 def db_check():
