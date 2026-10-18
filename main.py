@@ -1,14 +1,25 @@
 from pathlib import Path
-from fastapi import FastAPI, Path as FastAPIPath, HTTPException, Query
+from fastapi import FastAPI, Path as FastAPIPath, HTTPException, Query, Depends
 import json
 from pydantic import BaseModel,Field,computed_field,field_validator
 from typing import Annotated,Literal,Optional 
 from fastapi.responses import JSONResponse
-from myenv.db import Base,engine
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from myenv.db import Base, engine, get_db
+from sqlmodel import TaskModel
+
 
 Base.metadata.create_all(engine)
 
 app=FastAPI(title="Patient Management Application")
+
+@app.get("/db-check")
+def db_check():
+    with engine.connect() as connection:
+        return {"database": connection.execute(text("SELECT current_database()")).scalar()}
+
+
 
 class Patient(BaseModel):
     name: str
@@ -136,6 +147,10 @@ def sort_patients(
         sorted_data.reverse()
     return sorted_data
 
+
+@app.get('/tasks')
+def list_tasks(db: Session = Depends(get_db)):
+    return db.query(TaskModel).all()
 
 
 @app.post('/create')# this here refers to the /create endpoint of the API

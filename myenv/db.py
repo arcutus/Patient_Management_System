@@ -1,8 +1,7 @@
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from myenv.settings import settings
-Base=declarative_base()
-engine=create_engine(url=settings.DB_CONNECTION)
+from myenv.database import engine
+
+Base = declarative_base()
 localsession=sessionmaker(bind=engine)
 
 def get_db():
