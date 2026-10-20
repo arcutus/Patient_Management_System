@@ -1,60 +1,52 @@
 [
     {
-        "id": "P002",
-        "name": "John Doe",
-        "age": 19,
-        "address": "123 Main St",
-        "gender": "female",
-        "height": 1.75,
+        "id": "P001",
+        "name": "Steen Universe",
+        "age": 17,
+        "address": "Beach City",
+        "gender": "male",
+        "height": 1.67,
         "weight": 80.0,
-        "verdict": "Overweight",
-        "phone": "555-1234",
-        "bmi": 26.12
+        "phone": "555-1234"
+        
+    },
+    {
+        "id": "P002",
+        "name": "Marco Diaz",
+        "age": 30,
+        "address": "Muini",
+        "gender": "male",
+        "height": 1.80,
+        "weight": 70.62,
+        "phone": "12345-678"
     },
     {
         "id": "P003",
-        "name": "John Doe",
-        "age": 19,
-        "address": "123 Main St",
-        "gender": "female",
-        "height": 1.75,
-        "weight": 70.5,
-        "verdict": "Normal weight",
-        "phone": "555-1234",
-        "bmi": 23.02
+        "name": "Bill Cipher",
+        "age": 100,
+        "address": "Graity Falls",
+        "gender": "male",
+        "height": 1.01,
+        "weight": 30
     },
     {
         "id": "P004",
-        "name": "Fatima Zahra",
-        "age": 22,
-        "address": "Atlanta",
-        "gender": "Female",
-        "height": 160,
-        "weight": 45,
-        "verdict": "Underweight"
-    },
-    {
-        "name": "string",
-        "id": "BE26CS188",
-        "age": 19,
-        "gender": "female",
-        "address": "123 Main St",
+        "name": "Sokka",
+        "age": 24,
+        "gender": "male",
+        "address": "water Tribe",
         "phone": "555-1234",
-        "height": 1.75,
-        "weight": 70.5,
-        "bmi": 23.02,
-        "verdict": "Normal weight"
+        "height": 1.84,
+        "weight": 78.2
     },
     {
-        "name": "tinitn",
-        "id": "BE26CS189",
+        "id": "P005",
+        "name":"Luz Noceda",
         "age": 20,
         "gender": "female",
-        "address": "123 Main St",
+        "address": "123 second street",
         "phone": "555-1234",
-        "height": 1.75,
-        "weight": 70.5,
-        "bmi": 23.02,
-        "verdict": "Normal weight"
+        "height": 1.69,
+        "weight": 52.3
     }
 ]

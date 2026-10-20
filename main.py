@@ -1,6 +1,4 @@
-from pathlib import Path
 from fastapi import FastAPI, Path as FastAPIPath, HTTPException, Query, Depends
-import json
 from pydantic import BaseModel,Field,computed_field,field_validator
 from typing import Annotated,Literal,Optional 
 from fastapi.responses import JSONResponse
@@ -75,20 +73,7 @@ class UpdatePatient(BaseModel): #NOTE UpaatePatient is a pydatic model
 
 
 
-def load_data():
-    file_path = Path(__file__).resolve().parent / 'patients.json'
-    with open(file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    return data
-
 #NOTE NOTE @ is used to create endpoints in FastAPI. It is a decorator that is used to define a route for the API. The @app.get("/") decorator specifies that the function hello() should be called when a GET request is made to the root endpoint ("/") of the API.
-
-def save_data(data):
-    file_path = Path(__file__).resolve().parent / 'patients.json'
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=4)
-
-
 
 @app.get("/")# this here refers to the root endpoint of the API
 def hello ():
@@ -102,9 +87,8 @@ def about():
 
 
 @app.get('/view')# this here refers to the /view_patients endpoint of the API
-def view_patients():
-    data = load_data()# this line calls the load_data() function to load the patient data from the patients.json file and assigns it to the variable data.
-    return data# this line returns the patient data as a response to the client when they make a GET request to the /view_patients endpoint of the API.
+def view_patients(db: Session = Depends(get_db)):
+    return db.query(TaskModel).all()
 
 
 @app.get('/patient/{name}')
@@ -113,38 +97,36 @@ def view_patient(
         ..., 
         description='name of pateint must not be empty or have any other char orther than engish alphabets',
         examples={'default': {'summary': 'Example patient name', 'value': 'John Doe'}},
-    )
+    ),
+    db: Session = Depends(get_db),
 ):
-    #load all the patients
-    data = load_data()# this line calls the load_data() function to load the patient data from the patients.json file and assigns it to the variable data.
-    
     requested_name = ''.join(name.split()).casefold()
-    for patient in data:
-        patient_name = ''.join(patient.get('name', '').split()).casefold()
+    for patient in db.query(TaskModel).all():
+        patient_name = ''.join((patient.name or '').split()).casefold()
         if patient_name == requested_name:
             return patient
     raise HTTPException(status_code=404, detail='Patient not found')
 
 @app.get('/patient/id/{patient_id}')
-def view_patient_by_id(patient_id: str):
-    data = load_data()
-    for patient in data:
-        if patient.get('id') == patient_id:
-            return patient
+def view_patient_by_id(patient_id: str, db: Session = Depends(get_db)):
+    patient = db.get(TaskModel, patient_id)
+    if patient is not None:
+        return patient
     raise HTTPException(status_code=404, detail='Patient not found')
 
 @app.get('/sort')# this here refers to the /sort endpoint of the API
 def sort_patients(
     sort_by: str = Query(..., description='sort by name, age, or gender'),
-    order: str = Query('asc', description='sort in ascending or descending order')
+    order: str = Query('asc', description='sort in ascending or descending order'),
+    db: Session = Depends(get_db),
 ):
     if sort_by not in ['name', 'age', 'gender']:
         raise HTTPException(status_code=400, detail='Invalid field to sort by. Must be one of name, age, gender')
     if order not in ['asc', 'desc']:
         raise HTTPException(status_code=400, detail='Order must be either asc or desc')
 
-    data = load_data()
-    sorted_data = sorted(data, key=lambda patient: str(patient.get(sort_by, '')).lower())
+    data = db.query(TaskModel).all()
+    sorted_data = sorted(data, key=lambda patient: str(getattr(patient, sort_by, '')).lower())
     if order == 'desc':
         sorted_data.reverse()
     return sorted_data
@@ -156,18 +138,13 @@ def list_tasks(db: Session = Depends(get_db)):
 
 
 @app.post('/create')# this here refers to the /create endpoint of the API
-def create_patient(patient: Patient):
-    #load existing patients
-    data = load_data()
-    #to chek if the patient already exists
-    if patient.id in [p.get('id') for p in data]:
+def create_patient(patient: Patient, db: Session = Depends(get_db)):
+    if db.get(TaskModel, patient.id) is not None:
         raise HTTPException(status_code=400, detail='Patient with this ID already exists')
-    # new patitent data to be added 
-    
-    data.append(patient.model_dump())
-
-    #save into the jason file
-    save_data(data)
+    db_patient = TaskModel(**patient.model_dump())
+    db.add(db_patient)
+    db.commit()
+    db.refresh(db_patient)
 
     return JSONResponse(
         status_code=201,
@@ -178,49 +155,44 @@ def create_patient(patient: Patient):
     )
 
 @app.put('/edit/{patient_id}')# this here refers to the /edit endpoint of the API
-def edit_patient(patient_id:str,patient_update:UpdatePatient):
+def edit_patient(
+    patient_id: str,
+    patient_update: UpdatePatient,
+    db: Session = Depends(get_db),
+):
+    patient = db.get(TaskModel, patient_id)
+    if patient is None:
+        raise HTTPException(status_code=404, detail='incorrect patient id')
 
-    data = load_data()
-    for existing_patient_info in data:
-        if existing_patient_info.get('id') == patient_id:
-            updated_patient_info = patient_update.model_dump(exclude_unset=True, exclude_none=True)
-            existing_patient_info.update(updated_patient_info)
+    updated_fields = patient_update.model_dump(exclude_unset=True, exclude_none=True)
+    for field, value in updated_fields.items():
+        setattr(patient, field, value)
 
-            height = existing_patient_info.get('height')
-            weight = existing_patient_info.get('weight')
-            if height is not None and weight is not None:
-                height_in_meters = height / 100 if height > 3 else height
-                bmi = round(weight / (height_in_meters ** 2), 2)
-                existing_patient_info['bmi'] = bmi
-                if bmi < 18.5:
-                    existing_patient_info['verdict'] = 'Underweight'
-                elif bmi < 25:
-                    existing_patient_info['verdict'] = 'Normal weight'
-                elif bmi < 30:
-                    existing_patient_info['verdict'] = 'Overweight'
-                else:
-                    existing_patient_info['verdict'] = 'Obesity'
+    if patient.height is not None and patient.weight is not None:
+        height_in_meters = patient.height / 100 if patient.height > 3 else patient.height
+        patient.bmi = round(patient.weight / (height_in_meters ** 2), 2)
+        if patient.bmi < 18.5:
+            patient.verdict = 'Underweight'
+        elif patient.bmi < 25:
+            patient.verdict = 'Normal weight'
+        elif patient.bmi < 30:
+            patient.verdict = 'Overweight'
+        else:
+            patient.verdict = 'Obesity'
 
-            save_data(data)
-            return JSONResponse(
-                status_code=200,
-                content={'message': 'patient updated', 'patient': existing_patient_info},
-            )
-
-    raise HTTPException(status_code=404, detail='incorrect patient id')
+    db.commit()
+    db.refresh(patient)
+    return {'message': 'patient updated', 'patient': patient}
 
 #for delete
 @app.delete('/delete/{patient_id}')
-def delete_patient(patient_id: str):
-    data = load_data()
-    for index, patient in enumerate(data):
-        if patient.get('id') == patient_id:
-            del data[index]
-            save_data(data)
-            return JSONResponse(status_code=200, content={'message': 'patient deleted'})
-
-    raise HTTPException(status_code=404, detail='patient not found')
+def delete_patient(patient_id: str, db: Session = Depends(get_db)):
+    patient = db.get(TaskModel, patient_id)
+    if patient is None:
+        raise HTTPException(status_code=404, detail='patient not found')
+    db.delete(patient)
+    db.commit()
+    return JSONResponse(status_code=200, content={'message': 'patient deleted'})
         
         
     
-

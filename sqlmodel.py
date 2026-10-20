@@ -6,7 +6,7 @@ class TaskModel(Base):
     id = Column(String, primary_key=True, index=True)
     name = Column(String)
     age = Column(Integer)
-    #is_active = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=False)
     address = Column(String, nullable=True)
     gender = Column(String, nullable=True)
     height = Column(Float, nullable=True)
@@ -15,4 +15,3 @@ class TaskModel(Base):
     phone = Column(String, nullable=True)
     bmi = Column(Float, nullable=True)
     
-

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -41,11 +41,46 @@ def create_patients(
     patients: list[PatientCreate],
     db: Session = Depends(get_db),
 ):
-    new_patients = [TaskModel(**patient_to_dict(patient)) for patient in patients]
-    db.add_all(new_patients)
+    saved_patients = []
+    for patient in patients:
+        saved_patients.append(db.merge(TaskModel(**patient_to_dict(patient))))
     db.commit()
+    return {
+        "message": f"Successfully processed {len(saved_patients)} patient(s)",
+        "patients": patients,
+    }
 
-    for patient in new_patients:
-        db.refresh(patient)
 
-    return new_patients
+@router.delete("/clear-all")
+def clear_all_patients(db: Session = Depends(get_db)):
+    deleted_count = db.query(TaskModel).delete()
+    db.commit()
+    return {"message": f"Cleared {deleted_count} patients from database"}
+
+
+@router.delete("/delete/{patient_id}")
+def delete_patient(patient_id: str, db: Session = Depends(get_db)):
+    db_patient = db.query(TaskModel).filter(TaskModel.id == patient_id).first()
+    if not db_patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    db.delete(db_patient)
+    db.commit()
+    return {"message": f"Patient {patient_id} deleted successfully"}
+
+
+@router.put("/update/{patient_id}")
+def update_patient(
+    patient_id: str,
+    patient_data: PatientCreate,
+    db: Session = Depends(get_db),
+):
+    db_patient = db.query(TaskModel).filter(TaskModel.id == patient_id).first()
+    if not db_patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    for key, value in patient_to_dict(patient_data).items():
+        setattr(db_patient, key, value)
+
+    db.commit()
+    db.refresh(db_patient)
+    return {"message": "Patient updated successfully", "patient": patient_data}
