@@ -1,9 +1,15 @@
 from sqlalchemy import Column,Integer,String,Boolean,Float
 from myenv.db import Base
+import uuid
 
 class TaskModel(Base):
     __tablename__= "patients"
-    id = Column(String, primary_key=True, index=True)
+    id = Column(
+        String, 
+        primary_key=True, 
+        index=True, 
+        default=lambda: f"P-{uuid.uuid4().hex[:6].upper()}"
+    )
     name = Column(String)
     age = Column(Integer)
     is_active = Column(Boolean, default=False)

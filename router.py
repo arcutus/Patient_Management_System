@@ -9,7 +9,7 @@ router = APIRouter(prefix="/patients_data")
 
 
 class PatientCreate(BaseModel):
-    id: str
+    id: str|None=None #optional
     name: str
     age: int
     address: str | None = None
@@ -22,9 +22,11 @@ class PatientCreate(BaseModel):
 
 
 def patient_to_dict(patient: PatientCreate) -> dict:
-    if hasattr(patient, "model_dump"):  # Pydantic 2
-        return patient.model_dump()
-    return patient.dict()  # Pydantic 1
+    data = patient.model_dump() if hasattr(patient, "model_dump") else patient.dict()
+    # If id is None, remove it so SQLAlchemy auto-generates it
+    if data.get("id") is None:
+        data.pop("id", None)
+    return data
 
 
 @router.post("/create")
@@ -45,11 +47,28 @@ def create_patients(
     for patient in patients:
         saved_patients.append(db.merge(TaskModel(**patient_to_dict(patient))))
     db.commit()
+    #return {
+        #"message": f"Successfully processed {len(saved_patients)} patient(s)",
+        #"patients": patients,
+    
     return {
         "message": f"Successfully processed {len(saved_patients)} patient(s)",
-        "patients": patients,
+        "patients": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "age": p.age,
+                "gender": p.gender,
+                "address": p.address,
+                "phone": p.phone,
+                "height": p.height,
+                "weight": p.weight,
+            }
+            for p in saved_patients
+        ],
     }
 
+  
 
 @router.delete("/clear-all")
 def clear_all_patients(db: Session = Depends(get_db)):
