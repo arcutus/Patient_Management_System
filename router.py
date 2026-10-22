@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
+from fastapi import HTTPException,Path
 from myenv.db import get_db
 from sqlmodel import TaskModel
 
@@ -103,3 +103,17 @@ def update_patient(
     db.commit()
     db.refresh(db_patient)
     return {"message": "Patient updated successfully", "patient": patient_data}
+
+@router.get("/view_patients")
+def get_task(db: Session = Depends(get_db)):
+    task=db.query(TaskModel).all()
+    return{"status":"All tasks", 
+           "data":task}
+
+@router.get("/patient_info{patient_id}")
+def get_patient_id(patient_id: str, db: Session = Depends(get_db)):
+    patient = db.query(TaskModel).filter(TaskModel.id == patient_id).first()
+    if patient is None:
+        #if not patient:  this line of code could also be used in here
+        raise HTTPException(status_code=404, detail="Invalid ID")
+    return {"status": "Task fetched successfully", "data": patient}

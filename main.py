@@ -131,12 +131,6 @@ def sort_patients(
         sorted_data.reverse()
     return sorted_data
 
-
-@app.get('/tasks')
-def list_tasks(db: Session = Depends(get_db)):
-    return db.query(TaskModel).all()
-
-
 @app.post('/create')# this here refers to the /create endpoint of the API
 def create_patient(patient: Patient, db: Session = Depends(get_db)):
     if db.get(TaskModel, patient.id) is not None:
