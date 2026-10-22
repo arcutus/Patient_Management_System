@@ -64,7 +64,7 @@ def create_patients(
                 "height": p.height,
                 "weight": p.weight,
             }
-            for p in saved_patients
+            for p in saved_patients # p is just a varb
         ],
     }
 
