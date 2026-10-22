@@ -7,7 +7,7 @@ from sqlalchemy import text
 from myenv.db import Base, engine, get_db
 from sqlmodel import TaskModel
 from router import router as task_router
-
+from user.userrouter import user_router
 
 Base.metadata.create_all(engine)
 
@@ -16,6 +16,7 @@ main_router = APIRouter(prefix="/patient_info")
 
 app.include_router(task_router)
 app.include_router(main_router)
+app.include_router(user_router)
 
 
 @main_router.get("/db-check")
