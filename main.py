@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Path as FastAPIPath, HTTPException, Query, Depends
+from fastapi import APIRouter, FastAPI, Path as FastAPIPath, HTTPException, Query, Depends
 from pydantic import BaseModel,Field,computed_field,field_validator
 from typing import Annotated,Literal,Optional 
 from fastapi.responses import JSONResponse
@@ -12,9 +12,13 @@ from router import router as task_router
 Base.metadata.create_all(engine)
 
 app=FastAPI(title="Patient Management Application")
-app.include_router(task_router)
+main_router = APIRouter(prefix="/patient_info")
 
-@app.get("/db-check")
+app.include_router(task_router)
+app.include_router(main_router)
+
+
+@main_router.get("/db-check")
 def db_check():
     with engine.connect() as connection:
         return {"database": connection.execute(text("SELECT current_database()")).scalar()}
@@ -75,23 +79,23 @@ class UpdatePatient(BaseModel): #NOTE UpaatePatient is a pydatic model
 
 #NOTE NOTE @ is used to create endpoints in FastAPI. It is a decorator that is used to define a route for the API. The @app.get("/") decorator specifies that the function hello() should be called when a GET request is made to the root endpoint ("/") of the API.
 
-@app.get("/")# this here refers to the root endpoint of the API
+@main_router.get("/")# this here refers to the root endpoint of the API
 def hello ():
     return {"message":"Patients Management API"}#here a dictionary is being returned with a key "message" and a value "Hello, World!" when the hello() function is called. This will be the response sent back to the client when they make a GET request to the root endpoint of the API.
 
 #first hello world api
-@app.get('/about')# this here refers to the /about endpoint of the API
+@main_router.get('/about')# this here refers to the /about endpoint of the API
 #if anyone makes a GET request to the /about endpoint, the about() function will be called and it will return a dictionary with a key "message" and a value "This is an example of a FastAPI application." This will be the response sent back to the client.
 def about():
     return {"message":"A fully functional API to manage patient's records"}
 
 
-@app.get('/view')# this here refers to the /view_patients endpoint of the API
+@main_router.get('/view')# this here refers to the /view_patients endpoint of the API
 def view_patients(db: Session = Depends(get_db)):
     return db.query(TaskModel).all()
 
 
-@app.get('/patient/{name}')
+@main_router.get('/patient/{name}')
 def view_patient(
     name: str = FastAPIPath(
         ..., 
@@ -107,14 +111,14 @@ def view_patient(
             return patient
     raise HTTPException(status_code=404, detail='Patient not found')
 
-@app.get('/patient/id/{patient_id}')
+@main_router.get('/patient/id/{patient_id}')
 def view_patient_by_id(patient_id: str, db: Session = Depends(get_db)):
     patient = db.get(TaskModel, patient_id)
     if patient is not None:
         return patient
     raise HTTPException(status_code=404, detail='Patient not found')
 
-@app.get('/sort')# this here refers to the /sort endpoint of the API
+@main_router.get('/sort')# this here refers to the /sort endpoint of the API
 def sort_patients(
     sort_by: str = Query(..., description='sort by name, age, or gender'),
     order: str = Query('asc', description='sort in ascending or descending order'),
@@ -131,7 +135,7 @@ def sort_patients(
         sorted_data.reverse()
     return sorted_data
 
-@app.post('/create')# this here refers to the /create endpoint of the API
+@main_router.post('/create')# this here refers to the /create endpoint of the API
 def create_patient(patient: Patient, db: Session = Depends(get_db)):
     if db.get(TaskModel, patient.id) is not None:
         raise HTTPException(status_code=400, detail='Patient with this ID already exists')
@@ -148,7 +152,7 @@ def create_patient(patient: Patient, db: Session = Depends(get_db)):
         },
     )
 
-@app.put('/edit/{patient_id}')# this here refers to the /edit endpoint of the API
+@main_router.put('/edit/{patient_id}')# this here refers to the /edit endpoint of the API
 def edit_patient(
     patient_id: str,
     patient_update: UpdatePatient,
@@ -179,7 +183,7 @@ def edit_patient(
     return {'message': 'patient updated', 'patient': patient}
 
 #for delete
-@app.delete('/delete/{patient_id}')
+@main_router.delete('/delete/{patient_id}')
 def delete_patient(patient_id: str, db: Session = Depends(get_db)):
     patient = db.get(TaskModel, patient_id)
     if patient is None:
@@ -189,4 +193,3 @@ def delete_patient(patient_id: str, db: Session = Depends(get_db)):
     return JSONResponse(status_code=200, content={'message': 'patient deleted'})
         
         
-    

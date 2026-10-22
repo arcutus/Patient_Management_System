@@ -5,7 +5,7 @@ from fastapi import HTTPException,Path
 from myenv.db import get_db
 from sqlmodel import TaskModel
 
-router = APIRouter(prefix="/patients_data")
+router = APIRouter(prefix="/data_patient")
 
 
 class PatientCreate(BaseModel):
@@ -110,7 +110,7 @@ def get_task(db: Session = Depends(get_db)):
     return{"status":"All tasks", 
            "data":task}
 
-@router.get("/patient_info{patient_id}")
+@router.get("/patient_data{patient_id}")
 def get_patient_id(patient_id: str, db: Session = Depends(get_db)):
     patient = db.query(TaskModel).filter(TaskModel.id == patient_id).first()
     if patient is None:
