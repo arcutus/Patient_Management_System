@@ -24,3 +24,7 @@ class UserResponseSchema(BaseModel):
     
 
 #libraries  like pwjt and pwlib  was istalled on the termina for this
+
+class LoginSchema(BaseModel):
+    username:str
+    password:str
