@@ -1,5 +1,5 @@
-# Tutorials
-for practice 
+# Patient Management System
+for managing patient's data
 
 ## FastAPI patient data
 
