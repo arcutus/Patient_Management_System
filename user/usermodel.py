@@ -12,7 +12,7 @@ class UserSchema(BaseModel):
     def validate_email_domain(cls, email: str) -> str:
         email = email.strip()
         if not email.casefold().endswith("@gmail.com"):
-            raise ValueError("Email must end with @gmail.com")
+            raise ValueError("Invalid email.id")
         return email
 
 class UserResponseSchema(BaseModel):
