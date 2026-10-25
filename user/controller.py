@@ -1,15 +1,20 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from pwdlib import PasswordHash
-
+import jwt
+from myenv.database import ALGORITHM, EXP_TIME, SECRET_KEY
 from .register import UserModel
 from .usermodel import LoginSchema, UserSchema
+from datetime import datetime, timedelta
+
 
 password_hash = PasswordHash.recommended()
 
-
 def get_password_hash(password):
     return password_hash.hash(password)
+
+def verify_password(plain_password,hashed_password):
+    return password_hash.verify(plain_password,hashed_password)
 
 
 def register(body: UserSchema, db: Session):
@@ -52,9 +57,10 @@ def login_user(body: LoginSchema, db: Session):
     if not password_hash.verify(body.password, user.hash_password):
         raise HTTPException(401, detail="invalid password")
 
-    return {
-        "id": user.id,
-        "name": user.name,
-        "username": user.username,
-        "email": user.email,
-    }
+    exp_time = datetime.now() + timedelta(minutes=EXP_TIME)
+    
+    
+    
+    token = jwt.encode({"_id": user.id,"exp":exp_time}, SECRET_KEY, algorithm=ALGORITHM)
+    
+    return {"token":token}
