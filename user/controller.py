@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException,Request
 from sqlalchemy.orm import Session
 from pwdlib import PasswordHash
 import jwt
@@ -63,4 +63,11 @@ def login_user(body: LoginSchema, db: Session):
     
     token = jwt.encode({"_id": user.id,"exp":exp_time}, SECRET_KEY, algorithm=ALGORITHM)
     
+    return {"token":token}
+
+def is_authenticated(request:Request,db:Session):
+    token=request.headers.get("authorization")
+    token=token.split(" ")
+
+    data=jwt.decode(token,settings.SECRET_KEY,settings.ALGORITHM)
     return {"token":token}

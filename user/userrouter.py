@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status,Request
 from sqlalchemy.orm import Session
 
 from .usermodel import UserResponseSchema, UserSchema, LoginSchema
@@ -16,3 +16,8 @@ def registration(body: UserSchema, db: Session = Depends(get_db)):
 @user_router.post("/login", status_code=status.HTTP_200_OK)
 def login(body: LoginSchema, db: Session = Depends(get_db)):
     return controller.login_user(body, db)
+
+
+@user_router.get("/is_auth",status_code=status.HTTP_200_OK)
+def is_auth(request:Request,db: Session = Depends(get_db)):
+    return controller.is_authenticated(request,db)
