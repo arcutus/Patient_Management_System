@@ -65,9 +65,22 @@ def login_user(body: LoginSchema, db: Session):
     
     return {"token":token}
 
-def is_authenticated(request:Request,db:Session):
-    token=request.headers.get("authorization")
-    token=token.split(" ")
+def is_authenticated(request: Request, db: Session):
+    auth_header = request.headers.get("authorization")
+    if not auth_header:
+        raise HTTPException(401, detail="authorization header missing")
 
-    data=jwt.decode(token,settings.SECRET_KEY,settings.ALGORITHM)
-    return {"token":token}
+    try:
+        scheme, token = auth_header.split(" ", 1)
+    except ValueError:
+        raise HTTPException(401, detail="invalid authorization header")
+
+    if scheme.lower() != "bearer" or not token:
+        raise HTTPException(401, detail="invalid token format")
+
+    try:
+        data = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.PyJWTError:
+        raise HTTPException(401, detail="invalid or expired token")
+
+    return {"token": data}
