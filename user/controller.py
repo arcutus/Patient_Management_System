@@ -1,20 +1,22 @@
-from fastapi import HTTPException,Request
+from fastapi import HTTPException, Request
 from sqlalchemy.orm import Session
 from pwdlib import PasswordHash
 import jwt
 from myenv.database import ALGORITHM, EXP_TIME, SECRET_KEY
 from .register import UserModel
 from .usermodel import LoginSchema, UserSchema
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 password_hash = PasswordHash.recommended()
 
+
 def get_password_hash(password):
     return password_hash.hash(password)
 
-def verify_password(plain_password,hashed_password):
-    return password_hash.verify(plain_password,hashed_password)
+
+def verify_password(plain_password, hashed_password):
+    return password_hash.verify(plain_password, hashed_password)
 
 
 def register(body: UserSchema, db: Session):
@@ -57,13 +59,17 @@ def login_user(body: LoginSchema, db: Session):
     if not password_hash.verify(body.password, user.hash_password):
         raise HTTPException(401, detail="invalid password")
 
-    exp_time = datetime.now() + timedelta(minutes=EXP_TIME)
-    
-    
-    
-    token = jwt.encode({"_id": user.id,"exp":exp_time}, SECRET_KEY, algorithm=ALGORITHM)
-    
-    return {"token":token}
+    # Set expiration time in UTC
+    exp_time = datetime.now(timezone.utc) + timedelta(minutes=EXP_TIME)
+
+    token = jwt.encode(
+        {"_id": user.id, "exp": exp_time},
+        SECRET_KEY,
+        algorithm=ALGORITHM,
+    )
+
+    return {"token": token}
+
 
 def is_authenticated(request: Request, db: Session):
     auth_header = request.headers.get("authorization")
@@ -80,7 +86,14 @@ def is_authenticated(request: Request, db: Session):
 
     try:
         data = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    except jwt.PyJWTError:
-        raise HTTPException(401, detail="invalid or expired token")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, detail="token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(401, detail="invalid token")
 
-    return {"token": data}
+    # Verify that the user still exists in the database
+    user = db.query(UserModel).filter(UserModel.id == data.get("_id")).first()
+    if not user:
+        raise HTTPException(401, detail="user no longer exists")
+
+    return {"message": "Authenticated successfully", "user": {"id": user.id, "username": user.username}}
