@@ -1,0 +1,36 @@
+
+from fastapi import HTTPException, Request,Depends
+from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session
+from jwt.exceptions import InvalidTokenError
+from .register import UserModel
+import jwt
+from myenv.db import  get_db
+from myenv.database import ALGORITHM,SECRET_KEY
+
+def is_authenticated(request: Request, db: Session=Depends(get_db)):
+    auth_header = request.headers.get("authorization")
+    if not auth_header:
+        raise HTTPException(401, detail="authorization header missing")
+
+    try:
+        scheme, token = auth_header.split(" ", 1)
+    except ValueError:
+        raise HTTPException(401, detail="invalid authorization header")
+
+    if scheme.lower() != "bearer" or not token:
+        raise HTTPException(401, detail="invalid token format")
+
+    try:
+        data = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, detail="token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(401, detail="invalid token")
+
+    # Verify that the user still exists in the database
+    user = db.query(UserModel).filter(UserModel.id == data.get("_id")).first()
+    if not user:
+        raise HTTPException(401, detail="user no longer exists")
+
+    return {"message": "Authenticated successfully", "user": {"id": user.id, "username": user.username}}
