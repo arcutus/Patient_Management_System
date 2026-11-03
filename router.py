@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from fastapi import HTTPException,Path
 from myenv.db import get_db
 from sqlmodel import TaskModel
 
@@ -9,7 +8,8 @@ router = APIRouter(prefix="/data_patient")
 
 
 class PatientCreate(BaseModel):
-    id: str|None=None #optional
+    id: str | None = None  # optional
+    user_id: str | None = None  # optional link to user_table
     name: str
     age: int
     address: str | None = None
@@ -47,15 +47,13 @@ def create_patients(
     for patient in patients:
         saved_patients.append(db.merge(TaskModel(**patient_to_dict(patient))))
     db.commit()
-    #return {
-        #"message": f"Successfully processed {len(saved_patients)} patient(s)",
-        #"patients": patients,
-    
+
     return {
         "message": f"Successfully processed {len(saved_patients)} patient(s)",
         "patients": [
             {
                 "id": p.id,
+                "user_id": p.user_id,
                 "name": p.name,
                 "age": p.age,
                 "gender": p.gender,
@@ -64,11 +62,10 @@ def create_patients(
                 "height": p.height,
                 "weight": p.weight,
             }
-            for p in saved_patients # p is just a varb
+            for p in saved_patients
         ],
     }
 
-  
 
 @router.delete("/clear-all")
 def clear_all_patients(db: Session = Depends(get_db)):
@@ -104,16 +101,16 @@ def update_patient(
     db.refresh(db_patient)
     return {"message": "Patient updated successfully", "patient": patient_data}
 
+
 @router.get("/view_patients")
 def get_task(db: Session = Depends(get_db)):
-    task=db.query(TaskModel).all()
-    return{"status":"All tasks", 
-           "data":task}
+    task = db.query(TaskModel).all()
+    return {"status": "All tasks", "data": task}
 
-@router.get("/patient_data{patient_id}")
+
+@router.get("/patient_data/{patient_id}")
 def get_patient_id(patient_id: str, db: Session = Depends(get_db)):
     patient = db.query(TaskModel).filter(TaskModel.id == patient_id).first()
     if patient is None:
-        #if not patient:  this line of code could also be used in here
         raise HTTPException(status_code=404, detail="Invalid ID")
     return {"status": "Task fetched successfully", "data": patient}
