@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from pwdlib import PasswordHash
 import jwt
 from myenv.database import ALGORITHM, EXP_TIME, SECRET_KEY
-from .register import UserModel
+from .registertable import UserModel
 from .usermodel import LoginSchema, UserSchema
 from datetime import datetime, timedelta, timezone
 

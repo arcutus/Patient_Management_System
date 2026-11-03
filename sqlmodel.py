@@ -1,4 +1,4 @@
-from sqlalchemy import Column,Integer,String,Boolean,Float
+from sqlalchemy import Column,Integer,String,Boolean,Float,ForeignKey
 from myenv.db import Base
 import uuid
 
