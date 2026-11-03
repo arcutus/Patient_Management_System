@@ -11,6 +11,7 @@ class TaskModel(Base):
         default=lambda: f"P-{uuid.uuid4().hex[:6].upper()}"
     )
     name = Column(String)
+    username = Column(String, nullable=True)
     age = Column(Integer)
     is_active = Column(Boolean, default=False)
     address = Column(String, nullable=True)
