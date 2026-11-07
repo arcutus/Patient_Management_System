@@ -11,7 +11,7 @@ from user.userrouter import user_router
 
 Base.metadata.create_all(engine)
 
-app=FastAPI(title="Patient Management Application")
+app=FastAPI(title="Patient Management Application",version="1.0.0",description="API for managing patient records, appointments, and medical history.")
 main_router = APIRouter(prefix="/patient_info")
 
 app.include_router(task_router)
