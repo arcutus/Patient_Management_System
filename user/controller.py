@@ -6,7 +6,7 @@ from myenv.database import ALGORITHM, EXP_TIME, SECRET_KEY
 from .registertable import UserModel
 from .usermodel import LoginSchema, UserSchema
 from datetime import datetime, timedelta, timezone
-
+from .mail import send_email
 
 password_hash = PasswordHash.recommended()
 
@@ -19,7 +19,7 @@ def verify_password(plain_password, hashed_password):
     return password_hash.verify(plain_password, hashed_password)
 
 
-def register(body: UserSchema, db: Session):
+async def register(body: UserSchema, db: Session):
     print(body)
 
     is_user = db.query(UserModel).filter(UserModel.username == body.username).first()
@@ -42,6 +42,11 @@ def register(body: UserSchema, db: Session):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    try:
+        await send_email([new_user.email])
+    except Exception as e:
+        print(f"Warning: Could not send confirmation email: {e}")
 
     return {
         "id": new_user.id,
