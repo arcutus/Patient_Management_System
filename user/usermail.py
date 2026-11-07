@@ -9,9 +9,9 @@ class EmailSchema(BaseModel):
     email:List[EmailStr]
 
 conf=ConnectionConfig(
-    MAIL_USERNAME = "tintinarcutu@email.com",
+    MAIL_USERNAME = "tintinarcutus@email.com",
     MAIL_PASSWORD = "gmcd enme edtp rqtj",
-    MAIL_FROM = "tintinarcutu@email.com",
+    MAIL_FROM = "tintinarcutus@email.com",
     MAIL_PORT = 587,
     MAIL_SERVER = "smtp.gmail.com",
     MAIL_FROM_NAME="Patient_Management_System",

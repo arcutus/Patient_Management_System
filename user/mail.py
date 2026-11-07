@@ -5,19 +5,22 @@ from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 
 
 def get_mail_config() -> ConnectionConfig:
-    username = os.getenv("MAIL_USERNAME") or "tintinarcutu@gmail.com"
-    password = os.getenv("MAIL_PASSWORD") or "gmcd enme edtp rqtj"
-    mail_from = os.getenv("MAIL_FROM") or "tintinarcutu@gmail.com"
+    # Remove any accidental spaces in the password
+    raw_password = os.getenv("MAIL_PASSWORD") or "gmcdenmeedtprqtj"
+    password = raw_password.replace(" ", "")
+
+    username = os.getenv("MAIL_USERNAME") or "tintinarcutus@gmail.com"
+    mail_from = os.getenv("MAIL_FROM") or username
 
     return ConnectionConfig(
         MAIL_USERNAME=username,
         MAIL_PASSWORD=password,
         MAIL_FROM=mail_from,
-        MAIL_PORT=587,
+        MAIL_PORT=465,
         MAIL_SERVER="smtp.gmail.com",
         MAIL_FROM_NAME="Patient_Management_System",
-        MAIL_STARTTLS=True,
-        MAIL_SSL_TLS=False,
+        MAIL_STARTTLS=False,
+        MAIL_SSL_TLS=True,
         USE_CREDENTIALS=True,
         VALIDATE_CERTS=True,
     )
