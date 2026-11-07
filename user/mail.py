@@ -1,6 +1,10 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr, BaseModel
 from typing import List
+from starlette.responses import JSONResponse
+
+
+
 class EmailSchema(BaseModel):
     email:List[EmailStr]
 
@@ -16,3 +20,18 @@ conf=ConnectionConfig(
     USE_CREDENTIALS = True,
     VALIDATE_CERTS = True
 )
+
+
+@app.post("/email")
+async def send(emails:List[str]) -> JSONResponse:
+    html = """<p>Hi this test mail, thanks for using Fastapi-mail</p> """
+
+    message = MessageSchema(
+        subject="Registration Confirmation",
+        recipients=emails,
+        body=html,
+        subtype=MessageType.html)
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+    return JSONResponse(status_code=200, content={"message": "email has been sent"})
