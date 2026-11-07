@@ -1,4 +1,6 @@
-from fastapi import HTTPException, Request
+import logging
+
+from fastapi import BackgroundTasks, HTTPException, Request
 from sqlalchemy.orm import Session
 from pwdlib import PasswordHash
 import jwt
@@ -9,6 +11,16 @@ from datetime import datetime, timedelta, timezone
 from .mail import send_email
 
 password_hash = PasswordHash.recommended()
+logger = logging.getLogger(__name__)
+
+
+async def send_registration_email(email: str) -> None:
+    try:
+        await send_email([email])
+    except Exception:
+        logger.exception("Failed to send registration confirmation email")
+    else:
+        print("Registration confirmation email sent successfully")
 
 
 def get_password_hash(password):
@@ -19,9 +31,7 @@ def verify_password(plain_password, hashed_password):
     return password_hash.verify(plain_password, hashed_password)
 
 
-async def register(body: UserSchema, db: Session):
-    print(body)
-
+async def register(body: UserSchema, db: Session, background_tasks: BackgroundTasks):
     is_user = db.query(UserModel).filter(UserModel.username == body.username).first()
     if is_user:
         raise HTTPException(400, detail="username already exist")
@@ -43,11 +53,7 @@ async def register(body: UserSchema, db: Session):
     db.commit()
     db.refresh(new_user)
 
-    try:
-        await send_email([new_user.email])
-    except Exception as e:
-        print(f"Warning: Could not send confirmation email: {e}")
-
+    background_tasks.add_task(send_registration_email, new_user.email)
     return {
         "id": new_user.id,
         "name": new_user.name,

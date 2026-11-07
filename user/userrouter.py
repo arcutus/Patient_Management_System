@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status,Request
+from fastapi import APIRouter, Depends, status,Request,BackgroundTasks
 from sqlalchemy.orm import Session
 #from .helpers import is_authenticated
 from .usermodel import UserResponseSchema, UserSchema, LoginSchema
@@ -9,8 +9,12 @@ user_router = APIRouter(prefix="/user")
 
 
 @user_router.post("/register", response_model=UserResponseSchema, status_code=status.HTTP_201_CREATED)
-async def registration(body: UserSchema, db: Session = Depends(get_db)):
-    return await controller.register(body, db)
+async def registration(
+    body: UserSchema,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    return await controller.register(body, db, background_tasks)
 
 
 @user_router.post("/login", status_code=status.HTTP_200_OK)
