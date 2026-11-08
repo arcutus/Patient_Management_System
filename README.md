@@ -97,12 +97,5 @@ information in issues, pull requests, test data, or screenshots.
 ## License
 
 No license has been selected yet. Until a license is added, others generally do
-not have permission to reuse, modify, or distribute this project. **[Add a license
-and update this section once you choose one.]**
+not have permission to reuse, modify, or distribute this project. 
 
-## Note for public release
-
-Before publishing this repository publicly, remove any generated files or sensitive
-content, including database files, backup files, local virtual environment folders,
-and sample data that could be mistaken for real data. Review the repository history
-as well to ensure no private or confidential content remains.
