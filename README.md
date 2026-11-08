@@ -1,8 +1,8 @@
 # Patient Management System
 
-A learning project that provides a REST API for managing patient records. Built with Python and FastAPI, with database access through SQLAlchemy.
+A demo project that provides a REST API for managing patient records. Built with Python and FastAPI, with database access through SQLAlchemy.
 
-> **Educational use only.** This project is not intended for real patient data, clinical use, or production deployment. It does not claim to meet healthcare privacy, security, or regulatory requirements. Use synthetic data only.
+> **Project status: Demo.** This project is for learning and demonstration purposes only. It is not intended for real patient data, clinical use, or production deployment. It does not claim to meet healthcare privacy, security, or regulatory requirements. Use synthetic data only.
 
 ## Features
 
@@ -73,9 +73,9 @@ A learning project that provides a REST API for managing patient records. Built 
 
 These documentation links work when the API is running locally. Replace `127.0.0.1:8000` with your server address if running it elsewhere.
 
-## Testing with Postman
+## Testing API endpoints
 
-The API has been tested using [Postman](https://www.postman.com/). Start the application and send requests to `http://127.0.0.1:8000` (or your server's base URL). The `/docs` and `/redoc` pages describe the available endpoints and request schemas. No Postman collection is included in this repository.
+The API endpoints were tested using [Postman](https://www.postman.com/). Start the application and send requests to `http://127.0.0.1:8000` (or your server's base URL). Use `/docs` or `/redoc` to review the available endpoints and request schemas. No Postman collection is included in this repository.
 
 ## API overview
 
@@ -87,7 +87,7 @@ Use synthetic records only. Do not add real patient information, credentials, or
 
 ## Limitations and security
 
-This is a practice project, not a production-ready patient-record system. Before considering any real-world use, it would need a thorough security and privacy review, including authentication and authorization, input and access controls, secure configuration, logging practices, backups, and applicable legal and regulatory requirements.
+This is a demo project, not a production-ready patient-record system. Before considering any real-world use, it would need a thorough security and privacy review, including authentication and authorization, input and access controls, secure configuration, logging practices, backups, and applicable legal and regulatory requirements.
 
 ## Contributing
 
