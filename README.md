@@ -79,7 +79,7 @@ The API endpoints were tested using [Postman](https://www.postman.com/). Start t
 
 ## API overview
 
-The API includes patient-management routes under `/patient_info` and `/data_patient`. See the interactive documentation at `/docs` or `/redoc` for the current routes, parameters, and request examples.
+The API includes patient-management routes under `/patient_info` . See the interactive documentation at `/docs` or `/redoc` for the current routes, parameters, and request examples.
 
 ## Sample data
 
