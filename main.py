@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from myenv.db import Base, engine, get_db
 from sqlmodel import TaskModel
-from router import router as task_router
 from user.userrouter import user_router
 
 Base.metadata.create_all(engine)
@@ -14,7 +13,6 @@ Base.metadata.create_all(engine)
 app=FastAPI(title="Patient Management Application",version="1.0.0",description="API for managing patient records, appointments, and medical history.")
 main_router = APIRouter(prefix="/patient_info")
 
-app.include_router(task_router)
 app.include_router(main_router)
 app.include_router(user_router)
 
