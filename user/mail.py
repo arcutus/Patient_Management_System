@@ -10,7 +10,7 @@ def get_mail_config() -> ConnectionConfig:
     password = raw_password.replace(" ", "")
 
     username = os.getenv("MAIL_USERNAME") or "tintinarcutus@gmail.com"
-    mail_from = os.getenv("MAIL_FROM") or username
+    mail_from = os.getenv("MAIL_FROM") or "tintinarcutus@gmail.com"
 
     return ConnectionConfig(
         MAIL_USERNAME=username,
