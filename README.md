@@ -2,7 +2,7 @@
 
 A learning project that provides a REST API for managing patient records. Built with Python and FastAPI, with database access through SQLAlchemy.
 
-> **Educational use only.** This project is not intended for real patient data, clinical use, or production deployment. It does not claim to meet healthcare privacy, security, or regulatory requirements. Use only synthetic data.
+> **Educational use only.** This project is not intended for real patient data, clinical use, or production deployment. It does not claim to meet healthcare privacy, security, or regulatory requirements. Use synthetic data only.
 
 ## Features
 
@@ -10,21 +10,21 @@ A learning project that provides a REST API for managing patient records. Built 
 - Search records by patient name or ID
 - Sort records by name, age, or gender
 - Calculate BMI from height and weight
-- Interactive API documentation provided by FastAPI
+- Interactive API documentation with Swagger UI and ReDoc
 
 ## Technology
 
 - Python
 - FastAPI
 - SQLAlchemy
-- PostgreSQL (if this is the database configured by the project)
+- PostgreSQL
 
 ## Getting started
 
 ### Prerequisites
 
-- Python [supported version]
-- [PostgreSQL, if required by your configuration]
+- Python
+- PostgreSQL, configured for this application
 
 ### Setup
 
@@ -59,7 +59,7 @@ A learning project that provides a REST API for managing patient records. Built 
    pip install -r requirements.txt
    ```
 
-4. Configure the database using the project’s environment-variable or configuration instructions: **[add the verified configuration steps here]**.
+4. Configure PostgreSQL for your local environment. Keep database credentials and other secrets out of source control.
 
 5. Start the API:
 
@@ -67,35 +67,32 @@ A learning project that provides a REST API for managing patient records. Built 
    uvicorn main:app --reload
    ```
 
-6. Open the interactive API documentation at
-   [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+6. Open the API documentation:
+   - [Swagger UI](http://127.0.0.1:8000/docs)
+   - [ReDoc](http://127.0.0.1:8000/redoc)
+
+These documentation links work when the API is running locally. Replace `127.0.0.1:8000` with your server address if running it elsewhere.
+
+## Testing with Postman
+
+The API has been tested using [Postman](https://www.postman.com/). Start the application and send requests to `http://127.0.0.1:8000` (or your server's base URL). The `/docs` and `/redoc` pages describe the available endpoints and request schemas. No Postman collection is included in this repository.
 
 ## API overview
 
-The API includes patient-management routes under `/patient_info` and `/data_patient`.
-See the interactive documentation at `/docs` for the current routes, parameters,
-and request examples.
+The API includes patient-management routes under `/patient_info` and `/data_patient`. See the interactive documentation at `/docs` or `/redoc` for the current routes, parameters, and request examples.
 
 ## Sample data
 
-Use synthetic records only. Do not add real patient information, database files,
-backups, credentials, or other sensitive data to this repository.
+Use synthetic records only. Do not add real patient information, credentials, or other sensitive data to this repository.
 
 ## Limitations and security
 
-This is a practice project, not a production-ready patient-record system. Before
-considering any real-world use, it would need a thorough security and privacy
-review, including authentication and authorization, input and access controls,
-secure configuration, logging practices, backups, and applicable legal and
-regulatory requirements.
+This is a practice project, not a production-ready patient-record system. Before considering any real-world use, it would need a thorough security and privacy review, including authentication and authorization, input and access controls, secure configuration, logging practices, backups, and applicable legal and regulatory requirements.
 
 ## Contributing
 
-Issues and pull requests are welcome. Please do not include personal or medical
-information in issues, pull requests, test data, or screenshots.
+Issues and pull requests are welcome. Please do not include personal or medical information in issues, pull requests, test data, or screenshots.
 
 ## License
 
-No license has been selected yet. Until a license is added, others generally do
-not have permission to reuse, modify, or distribute this project. 
-
+This repository does not currently include a license. Without a license, others should not assume they have permission to reuse, modify, or distribute the code. Choose and add a license if you want to grant those permissions.
