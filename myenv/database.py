@@ -1,12 +1,32 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-#DB_CONNECTION_URL = "postgresql://postgres:passod@localhost:5432/database_name"
-#DB_CONNECTION_URL = "postgresql://postgres:280230@localhost:5432/localhost"
+# Load environment variables from .env in project root
+ROOT_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=ROOT_DIR / ".env")
 
+DB_CONNECTION_URL = os.getenv("DATABASE_URL") or os.getenv("DB_CONNECTION_URL")
+if not DB_CONNECTION_URL:
+    raise RuntimeError(
+        "Missing required environment variable: DATABASE_URL (or DB_CONNECTION_URL) in .env file."
+    )
 
-DB_CONNECTION_URL = "postgresql+psycopg2://postgres:280230@localhost:5432/postgres"
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "Missing required environment variable: SECRET_KEY in .env file."
+    )
 
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+
+raw_exp_time = os.getenv("EXP_TIME") or os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
+try:
+    EXP_TIME = int(raw_exp_time)
+except ValueError:
+    raise RuntimeError("EXP_TIME must be an integer representing minutes.")
 
 engine = create_engine(DB_CONNECTION_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -22,7 +42,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-EXP_TIME=30

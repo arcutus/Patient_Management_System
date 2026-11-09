@@ -1,0 +1,30 @@
+# Environment files and credentials
+.env
+.env.*
+!.env.example
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+*/__pycache__/
+*/*/__pycache__/
+
+# Local database files and backups
+*.db
+*.sqlite3
+*.bak
+app.db*
+
+# Virtual environments
+.venv/
+venv/
+env/
+myenv/Lib/
+myenv/Scripts/
+myenv/Include/
+myenv/pyvenv.cfg
+
+# IDE and editor files
+.vscode/
+.idea/
